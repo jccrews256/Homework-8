@@ -1,0 +1,166 @@
+---
+title: "Homework 8"
+author: "Cass Crews"
+format: html
+editor: visual
+---
+
+# Introduction
+
+The goal of this work is to practice fitting linear models and evaluating the predictive ability of those models. For this practice, we will use bike share rental data from the Seoul bike share program. The goal will be to effectively predict daily bike share rentals. 
+
+# Loading Packages
+
+Before getting started, we need to load in some packages. 
+
+```{r}
+#Loading packages
+library(tidyverse)
+library(tidymodels)
+library(broom)
+library(knitr)
+library(skimr)
+
+#Ensuring we don't print in scientific notation
+options(scipen=999)
+```
+
+
+# Reading in Data
+
+Now we will read in the Seoul bike share data. In the code chunk below, note that we must specify that the encoding is "latin1" in order to read in the data without error. 
+
+```{r}
+bike_share_data<-read_csv("https://www4.stat.ncsu.edu/~online/datasets/SeoulBikeData.csv",locale = locale(encoding = "latin1"))
+```
+
+# Exploratory Data Analysis
+
+### Checking the Data
+
+Before we model the data, we need to do some standard validation checks. 
+
+First, we will check whether any of the variables have missing values. 
+
+```{r}
+#Capturing number of missing values by variable
+bike_share_data |>
+  summarize(across(everything(),~sum(is.na(.x))))
+```
+
+Impressively, none of the variables have missing values. This is a great dataset! 
+
+Next, we will confirm that the variable/column types set by `read_csv` are logical. 
+
+```{r}
+#Checking variable types
+str(bike_share_data)
+```
+
+Outside of `Date` being a character instead of a date, and `Seasons`,`Holiday`, and `Functioning Day` being character types instead of factors, things look good! We can address those issues in a bit. 
+
+A tricky variable is `Hour`, as it is "circular"; hour 23 of one day is only 60 minutes from hour 0 of the next day. We will go ahead and convert this to a factor to be safe. 
+
+```{r}
+#Converting Hour to a factor variable
+bike_share_data<-bike_share_data |>
+  mutate(Hour = factor(Hour))
+```
+
+As additional validity checks, we will explore the values of each variable. To do so, we will generate basic summary statistics for the numeric variables and list the distinct values of the categorical variables. 
+
+```{r}
+#Generating basic summary statistics for the numeric variables
+bike_share_data |>
+  summarize(across(where(is.numeric),list("mean" = mean,
+                                     "median" = median,
+                                      "sd" = sd,
+                                      "IQR" = IQR,
+                                      "min" = min,
+                                      "max" = max),
+                   .names = "{.fn}__{.col}")) |>
+  pivot_longer(everything(),names_to = c(".value", "variable"),names_sep = "__") 
+```
+
+Looking at the summary statistics for the numeric variables, nothing seems particularly concerning. However, I admit that I am not very knowledgeable of the normal range for solar radiation. 
+
+For the categorical variables, we won't worry about `Date`; we will check the range of this variable once we convert is to a date type.
+
+```{r}
+#Listing unique values of the categorical and factor variables excluding Date
+bike_share_data |>
+  select(Hour, Seasons, Holiday, `Functioning Day`) |>
+  map(unique)
+```
+
+No concerning values here. 
+
+Onto `Date`. We need to make this a date type so that it is more easily used. We can use the `lubridate` package for that. 
+
+After making the conversion, we can confirm the conversion worked by looking at the structure and extracting the min and max dates. 
+
+```{r}
+#Converting Date to a date
+bike_share_data<-bike_share_data |>
+  mutate(Date = dmy(Date))
+
+#Confirming change
+str(bike_share_data$Date)
+
+#Extracting min and max
+bike_share_data |>
+  summarize(min = min(Date),max = max(Date))
+```
+
+Looking at the structure as well as the endpoints of the date range, everything looks good! It seems we have a year of data starting on December 12, 2017, and ending on November 30, 2018. 
+
+Let's convert the remaining character types to factors. Given the current values are generally informative, we won't worry about creating any new labels for the levels. 
+
+```{r}
+#Converting character types to factors
+bike_share_data<-bike_share_data |>
+  mutate(across(where(is.character),factor))
+```
+
+Before we move on to exploring our data more deeply, let's convert the names to ones that are more R-friendly and consistent. 
+
+```{r}
+#Converting to more friendly variable names
+bike_share_data<-bike_share_data |>
+  rename(date = Date,
+         rented_count = `Rented Bike Count`,
+         hour = Hour,
+         temperature = `Temperature(°C)`,
+         humidity = `Humidity(%)`,
+         wind_speed = `Wind speed (m/s)`,
+         visibility = `Visibility (10m)`,
+         dew_point = `Dew point temperature(°C)`,
+         radiation = `Solar Radiation (MJ/m2)`,
+         rainfall = `Rainfall(mm)`,
+         snowfall = `Snowfall (cm)`,
+         season = Seasons,
+         holiday = Holiday,
+         functional = `Functioning Day`)
+```
+
+
+### Summarizing the Data
+
+We've already produced overall summary statistics for our numeric variables. In doing so, we saw that there were roughly 705 bikes rented each hour, on average. We also saw that there was a substantial amount of variation with the standard deviation being nearly as large as the mean (645 bikes). 
+
+Now, let's generate the same summary statistics for our variable of interest (number of bikes rented) by levels of `season`, `holiday`, and `functional`. 
+
+```{r}
+#Generating basic summary statistics for the numeric variables
+bike_share_data |>
+  group_by(season) |>
+  summarize(across(rented_count,list("mean" = mean,
+                                      "median" = median,
+                                      "sd" = sd,
+                                      "IQR" = IQR,
+                                      "min" = min,
+                                      "max" = max),
+                   .names = "{.fn}__{.col}")) |>
+  pivot_longer(mean__rented_count:max__rented_count,names_to = c(".value", "variable"),names_sep = "__") 
+```
+
