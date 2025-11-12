@@ -20,6 +20,9 @@ library(tidymodels)
 library(broom)
 library(knitr)
 library(skimr)
+library(kableExtra)
+library(patchwork)
+library(rsample)
 
 #Ensuring we don't print in scientific notation
 options(scipen=999)
@@ -144,14 +147,41 @@ bike_share_data<-bike_share_data |>
 ```
 
 
-### Summarizing the Data
+### Summarizing the Hourly Data
 
 We've already produced overall summary statistics for our numeric variables. In doing so, we saw that there were roughly 705 bikes rented each hour, on average. We also saw that there was a substantial amount of variation with the standard deviation being nearly as large as the mean (645 bikes). 
 
 Now, let's generate the same summary statistics for our variable of interest (number of bikes rented) by levels of `season`, `holiday`, and `functional`. 
 
+To start, we will summarize rental counts across levels of the functioning indicator, as it may reflect the hours the program is and is not operational. 
+
 ```{r}
-#Generating basic summary statistics for the numeric variables
+#Generating summary statistics for bikes rented by functional
+bike_share_data |>
+  group_by(functional) |>
+  summarize(across(rented_count,list("mean" = mean,
+                                      "median" = median,
+                                      "sd" = sd,
+                                      "IQR" = IQR,
+                                      "min" = min,
+                                      "max" = max),
+                   .names = "{.fn}__{.col}")) |>
+  pivot_longer(mean__rented_count:max__rented_count,names_to = c(".value", "variable"),names_sep = "__") 
+```
+
+Indeed, there are no rentals for the hours in which `functional` is "no". Let's subset to only observations where this indicator has a value of "yes". 
+
+```{r}
+#Subsetting to only operating hours
+bike_share_data<-bike_share_data |>
+  filter(functional=="Yes") |>
+  select(!functional)
+```
+
+
+
+```{r}
+#Generating summary statistics for bikes rented by season
 bike_share_data |>
   group_by(season) |>
   summarize(across(rented_count,list("mean" = mean,
@@ -164,3 +194,360 @@ bike_share_data |>
   pivot_longer(mean__rented_count:max__rented_count,names_to = c(".value", "variable"),names_sep = "__") 
 ```
 
+Note that winter has much lower average hourly rentals. This makes sense as this is the coldest time of the year. 
+
+Now, let's look at rental rates by the `holiday` indicator. 
+
+```{r}
+#Generating summary statistics for bikes rented by holiday indicator
+bike_share_data |>
+  group_by(holiday) |>
+  summarize(across(rented_count,list("mean" = mean,
+                                      "median" = median,
+                                      "sd" = sd,
+                                      "IQR" = IQR,
+                                      "min" = min,
+                                      "max" = max),
+                   .names = "{.fn}__{.col}")) |>
+  pivot_longer(mean__rented_count:max__rented_count,names_to = c(".value", "variable"),names_sep = "__") 
+```
+
+Interestingly, the average hourly rental count is lower on holidays. This may be because holidays are more likely to occur in colder seasons, or it may be because the bikes are commonly used to travel to and from work. 
+
+To investigate this, let's look at rental counts by `season` AND `holiday`. 
+
+```{r}
+#Generating summary statistics for bikes rented by season and holiday indicator
+
+bike_share_data |>
+  group_by(season, holiday) |>
+  summarize(across(rented_count,list("mean" = mean,
+                                      "median" = median,
+                                      "sd" = sd,
+                                      "IQR" = IQR,
+                                      "min" = min,
+                                      "max" = max),
+                   .names = "{.fn}__{.col}")) |>
+  pivot_longer(mean__rented_count:max__rented_count,names_to = c(".value", "variable"),names_sep = "__") 
+```
+
+It seems the average hourly rental count is lower on holidays in spring and winter. However, the opposite is true in the fall and the difference is negligible in the summer. 
+
+As a final step, let's look at pairwise correlations for the numeric variables. 
+
+```{r}
+bike_share_data |>
+  select(where(is.numeric)) |>
+  cor() |>
+  kable(caption="Pairwise Correlations for Numeric Variables (Hourly)") |>
+  kable_styling() |>
+  column_spec(column = 1,bold = TRUE) 
+```
+
+Focusing on correlations with the response, it seems `temperature` and sunlight (proxied by `radiation`) have the strongest correlations with rental count. `humidity` has the weakest relationship with rental count, but there may still be a non-linear relationship or a linear relationship that only exists when we control for other factors correlated with `humidity` and `rented_count`. 
+
+### Converting to Daily Data
+
+To simplify our analysis, let's convert our hourly data to daily. In many ways, this is more informative, as intra-day variations add an unnecessary layer of complexity. 
+
+To do so, we will sum hourly rental counts, snowfall, and rainfall. We will average everything else. 
+
+```{r}
+#Converting data to daily
+bike_share_data<-bike_share_data |>
+  group_by(date, season, holiday) |>
+  mutate(across(c(rented_count, snowfall, rainfall),sum,.names = "{.col}_day"), #some variables to sums
+         across(temperature:radiation,mean,.names = "{.col}_day")) |> #others to means
+  ungroup() |>
+  distinct(date, season, holiday, .keep_all = TRUE) |>
+  select(date, season, holiday, ends_with("_day")) |> #removing original hourly numeric variables
+  rename_with(~ str_remove(.,"_day"))
+```
+
+
+### Summarizing the Daily Data
+
+Now that we have daily data, let's recreate the summary statistics we produced for the hourly data. 
+
+To start, let's reproduce the overall summary statistics for our numeric variables. 
+
+```{r}
+#Generating basic summary statistics for the numeric variables
+bike_share_data |>
+  summarize(across(where(is.numeric),list("mean" = mean,
+                                     "median" = median,
+                                      "sd" = sd,
+                                      "IQR" = IQR,
+                                      "min" = min,
+                                      "max" = max),
+                   .names = "{.fn}__{.col}")) |>
+  pivot_longer(everything(),names_to = c(".value", "variable"),names_sep = "__") 
+```
+
+This clearly demonstrates our transformations, as the previously hourly averages for `rented_count`, `snowfall`, and `rainfall` have now been effectively scaled up to reflect the 24-hour period. 
+
+Now to the arguably more interesting tables, let's look at the bike rental counts by season.
+
+```{r}
+#Generating summary statistics for bikes rented by season
+bike_share_data |>
+  group_by(season) |>
+  summarize(across(rented_count,list("mean" = mean,
+                                      "median" = median,
+                                      "sd" = sd,
+                                      "IQR" = IQR,
+                                      "min" = min,
+                                      "max" = max),
+                   .names = "{.fn}__{.col}")) |>
+  pivot_longer(mean__rented_count:max__rented_count,names_to = c(".value", "variable"),names_sep = "__") 
+```
+
+We see the same pattern as we did for the hourly data, with summer and autumn having the highest daily average counts. One interesting note we did not discuss previously: the standard deviation, inner quartile range, and range all indicate that spring sees the greatest volatility in bike share activity across days. This is not particularly surprising as spring likely has both cold, snowy days and warm, sunny days. 
+
+Let's look again at rental activity by the holiday indicator. 
+
+```{r}
+#Generating summary statistics for bikes rented by holiday indicator
+bike_share_data |>
+  group_by(holiday) |>
+  summarize(across(rented_count,list("mean" = mean,
+                                      "median" = median,
+                                      "sd" = sd,
+                                      "IQR" = IQR,
+                                      "min" = min,
+                                      "max" = max),
+                   .names = "{.fn}__{.col}")) |>
+  pivot_longer(mean__rented_count:max__rented_count,names_to = c(".value", "variable"),names_sep = "__") 
+```
+
+We again see the intriguing factor that non-holiday days in our sample see greater rental activity, on average. 
+
+As we did previously, we will explore whether this relationship holds across seasons. 
+
+```{r}
+#Generating summary statistics for bikes rented by season and holiday indicator
+
+bike_share_data |>
+  group_by(season, holiday) |>
+  summarize(across(rented_count,list("mean" = mean,
+                                      "median" = median,
+                                      "sd" = sd,
+                                      "IQR" = IQR,
+                                      "min" = min,
+                                      "max" = max),
+                   .names = "{.fn}__{.col}")) |>
+  pivot_longer(mean__rented_count:max__rented_count,names_to = c(".value", "variable"),names_sep = "__") 
+```
+
+We again see that non-holiday days see more activity, on average, than holiday days only in spring and winter. 
+
+Before we produce graphical summaries of the data, let's reproduce the pairwise correlation table. 
+
+```{r}
+bike_share_data |>
+  select(where(is.numeric)) |>
+  cor() |>
+  kable(caption="Pairwise Correlations for Numeric Variables (Daily)") |>
+  kable_styling() |>
+  column_spec(column = 1,bold = TRUE) 
+```
+
+There are no major differences between the daily and hourly correlations. 
+
+Let's now look at scatterplots that visually compare our response to each numeric predictor. 
+
+```{r}
+plot_list<-list()
+
+for (v in names(bike_share_data)[5:12]) {
+  g<-ggplot(data=bike_share_data,aes(x = !!sym(v),y = rented_count)) + geom_point() + 
+    labs(y = "Rented Bikes")
+  plot_list<-c(plot_list,g) 
+}
+
+wrap_plots(plot_list) + plot_annotation(title = "Daily Bike Rentals vs. Each Numeric Predictor")
+```
+
+One thing stands out that was reflected in the overall summary statistics table: the majority of days have no rain and/or no snow. 
+
+Overall, there are no clear signs of any non-linear relationships that would have been overlooked if we only considered correlations. 
+
+If we were focused on inference, the fanning of rented bikes counts as dew point and temperature increased would be of concern because of the constant variance assumption for linear regression models. Fortunately, we are focused on prediction. 
+
+
+# Splitting the Data
+
+To evaluate the predictive capabilities of the multiple linear regression models we build, we need to split the data into training and test sets. Let's retain 75% of the data for training and stratify by `season` to ensure the seasonal breakdowns are similar across training and test sets. 
+
+```{r}
+#Setting seed for reproducibility
+set.seed(10)
+
+#Splitting the data into training and test sets 
+bike_share_split<-initial_split(bike_share_data, strata = season, prop = 0.75)
+
+#Printing the structure of the split object
+bike_share_split
+```
+
+Note that in printing the structure we see that 263 of the 353 day-level observations are retained in the training set; the other 90 observations are places in the test set. 
+
+Let's extract the training and test sets for use in our analysis. Let's also split the training set into 10 folds so that we can identify the best model among candidate linear regression models using 10-fold cross validation. 
+
+```{r}
+#Setting seed for reproducibility 
+set.seed(5)
+
+#Extracting training and test sets
+bike_share_train<-training(bike_share_split)
+bike_share_test<-testing(bike_share_split)
+
+#Separating the training data into the 10 folds
+folds<-vfold_cv(bike_share_train, v = 10)
+
+#Printing the structure of the folds object
+folds
+```
+
+In printing `folds`, we see that we have segmented the training data into 10 folds. 
+
+
+# Modeling Rental Counts with Multiple Linear Regression Models
+
+Now we can build some models. The first model we will specify has the following characteristics:
+
+- All variables in the dataset are used to predict `rented_count`
+  - The one caveat is that we use a weekend indicator rather than `date` explicitly
+- All numeric variables are normalized
+- Dummies are creates for the levels of the factor variables (`season`, ` holiday`, and the new `weekend` indicator)
+
+
+```{r}
+#Constructing first recipe
+bike_rec_1<-recipe(rented_count ~ ., data = bike_share_train) |>
+  #Assigning date to ID role
+  update_role(date, new_role = "ID") |>
+  #Creating intermediate day-of-week variable
+  step_date(date, features=c("dow")) |>
+  #Creating weekend indicator
+  step_mutate(weekend = factor(if_else(date_dow %in% c("Sat","Sun"),"yes","no"))) |>
+  #Removing intermediate variable
+  step_rm(date_dow) |>
+  #Normalizing all numeric predictors
+  step_normalize(all_numeric(), -all_outcomes()) |>
+  #Creating dummies for all factors
+  step_dummy(season, holiday, weekend)
+
+#Printing recipe variable list with roles
+bike_rec_1 |>
+  prep(training = bike_share_train) |>
+  summary()
+```
+
+In printing the summary of the prepped recipe, we can see that date now has the role "ID" rather than "predictor". We can also see the indicators that were created. 
+
+Let's specify a second model that includes all the previous characteristics, but also includes interactions for `season` and `holiday`, `season` and `temperature`, and `temperature` and `rainfall`. 
+
+```{r}
+#Constructing first recipe
+bike_rec_2<-recipe(rented_count ~ ., data = bike_share_train) |>
+  #Assigning date to ID role
+  update_role(date, new_role = "ID") |>
+  #Creating intermediate day-of-week variable
+  step_date(date, features=c("dow")) |>
+  #Creating weekend indicator
+  step_mutate(weekend = factor(if_else(date_dow %in% c("Sat","Sun"),"yes","no"))) |>
+  #Removing intermediate variable
+  step_rm(date_dow) |>
+  #Normalizing all numeric predictors
+  step_normalize(all_numeric(), -all_outcomes()) |>
+  #Creating dummies for all factors
+  step_dummy(season, holiday, weekend) |>
+  #Adding season-holiday interaction
+  step_interact(terms = ~holiday_No.Holiday*starts_with("season")) |>
+  #Adding season-temp interaction 
+  step_interact(terms = ~temperature*starts_with("season")) |>
+  #Adding temperature-rainfall interaction 
+  step_interact(terms = ~temperature*rainfall)
+  
+
+#Printing recipe variable list with roles
+bike_rec_2 |>
+  prep(training = bike_share_train) |>
+  summary()
+```
+
+When printing the summary of this prepped recipe, we see the interaction terms; the "x" in the interaction term names is a nice touch by the `tidyverse`. 
+
+Let's specify a final model, which includes all of the characteristics as the second model and also includes quadratic terms for the numeric predictors. 
+
+```{r}
+#Constructing first recipe
+bike_rec_3<-recipe(rented_count ~ ., data = bike_share_train) |>
+  #Assigning date to ID role
+  update_role(date, new_role = "ID") |>
+  #Creating intermediate day-of-week variable
+  step_date(date, features=c("dow")) |>
+  #Creating weekend indicator
+  step_mutate(weekend = factor(if_else(date_dow %in% c("Sat","Sun"),"yes","no"))) |>
+  #Removing intermediate variable
+  step_rm(date_dow) |>
+  #Normalizing all numeric predictors
+  step_normalize(all_numeric(), -all_outcomes()) |>
+  #Adding quadratic terms for numeric variables
+  step_poly(all_numeric(), -all_outcomes(), degree = 2, options = list(raw = TRUE)) |>
+  #Creating dummies for all factors
+  step_dummy(season, holiday, weekend) |>
+  #Adding season-holiday interaction
+  step_interact(terms = ~holiday_No.Holiday*starts_with("season")) |>
+  #Adding season-temp interaction 
+  step_interact(terms = ~temperature_poly_1*starts_with("season")) |>
+  #Adding temperature-rainfall interaction 
+  step_interact(terms = ~temperature_poly_1*rainfall_poly_1)
+  
+
+#Printing recipe variable list with roles
+bike_rec_3 |>
+  prep(training = bike_share_train) |>
+  summary()
+```
+
+We now have quadratic terms; note that the original numeric variables now have a "_poly_1" suffix to explicitly indicate they are still linear terms. 
+
+Our next step is to specify the type of model we want to fit, which is the linear regression model. 
+
+```{r}
+#Specifying an ordinary least squares model
+lm_model<-linear_reg() |>
+  set_engine("lm")
+```
+
+It is finally time to fit some models and see how well they predict! The code below fits each of the three models we have specified above for each of the 10 "training" sets and collects their cross-validation prediction error metrics.  
+
+```{r}
+#Fitting first model to each "training" set and testing for each fold 
+bike_fit_1<-workflow() |>
+  add_recipe(bike_rec_1) |>
+  add_model(lm_model) |>
+  fit_resamples(folds)
+
+#Fitting second model to each "training" set and testing for each fold 
+bike_fit_2<-workflow() |>
+  add_recipe(bike_rec_2) |>
+  add_model(lm_model) |>
+  fit_resamples(folds)
+
+#Fitting third model to each "training" set and testing for each fold 
+bike_fit_3<-workflow() |>
+  add_recipe(bike_rec_3) |>
+  add_model(lm_model) |>
+  fit_resamples(folds)
+
+#Capturing fit metrics
+rbind(bike_fit_1 |> collect_metrics() |> mutate(model = 1),
+      bike_fit_2 |> collect_metrics() |> mutate(model = 2),
+      bike_fit_3 |> collect_metrics() |> mutate(model = 3))
+```
+
+
+Based on the cross-validated test root mean squared error (RMSE), the third linear regression model predicts the number of rented bikes best. 
