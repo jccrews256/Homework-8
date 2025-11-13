@@ -225,7 +225,7 @@ The following object is masked from 'package:dplyr':
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rsample)</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co">#Ensuring we don't print in scientific notation</span></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">scipen=</span><span class="dv">999</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">scipen =</span> <span class="dv">999</span>,<span class="at">pillar.sigfig =</span> <span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="reading-in-data" class="level1">
@@ -328,17 +328,17 @@ dbl (10): Rented Bike Count, Hour, Temperature(°C), Humidity(%), Wind speed ...
 <span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">everything</span>(),<span class="at">names_to =</span> <span class="fu">c</span>(<span class="st">".value"</span>, <span class="st">"variable"</span>),<span class="at">names_sep =</span> <span class="st">"__"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 9 × 7
-  variable                       mean  median      sd     IQR   min     max
-  &lt;chr&gt;                         &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;
-1 Rented Bike Count          705.      504.   645.     874.     0   3556   
-2 Temperature(°C)             12.9      13.7   11.9     19    -17.8   39.4 
-3 Humidity(%)                 58.2      57     20.4     32      0     98   
-4 Wind speed (m/s)             1.72      1.5    1.04     1.4    0      7.4 
-5 Visibility (10m)          1437.     1698    608.    1060     27   2000   
-6 Dew point temperature(°C)    4.07      5.1   13.1     19.5  -30.6   27.2 
-7 Solar Radiation (MJ/m2)      0.569     0.01   0.869    0.93   0      3.52
-8 Rainfall(mm)                 0.149     0      1.13     0      0     35   
-9 Snowfall (cm)                0.0751    0      0.437    0      0      8.8 </code></pre>
+  variable                         mean  median        sd     IQR   min     max
+  &lt;chr&gt;                           &lt;dbl&gt;   &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;
+1 Rented Bike Count          704.60      504.5  645.00     874.25   0   3556   
+2 Temperature(°C)             12.883      13.7   11.945     19    -17.8   39.4 
+3 Humidity(%)                 58.226      57     20.362     32      0     98   
+4 Wind speed (m/s)             1.7249      1.5    1.0363     1.4    0      7.4 
+5 Visibility (10m)          1436.8      1698    608.30    1060     27   2000   
+6 Dew point temperature(°C)    4.0738      5.1   13.060     19.5  -30.6   27.2 
+7 Solar Radiation (MJ/m2)      0.56911     0.01   0.86875    0.93   0      3.52
+8 Rainfall(mm)                 0.14869     0      1.1282     0      0     35   
+9 Snowfall (cm)                0.075068    0      0.43675    0      0      8.8 </code></pre>
 </div>
 </div>
 <p>Looking at the summary statistics for the numeric variables, nothing seems particularly concerning. However, I admit that I am not very knowledgeable of the normal range for solar radiation.</p>
@@ -432,10 +432,10 @@ $`Functioning Day`
 <span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(mean__rented_count<span class="sc">:</span>max__rented_count,<span class="at">names_to =</span> <span class="fu">c</span>(<span class="st">".value"</span>, <span class="st">"variable"</span>),<span class="at">names_sep =</span> <span class="st">"__"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 2 × 8
-  functional variable      mean median    sd   IQR   min   max
-  &lt;fct&gt;      &lt;chr&gt;        &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-1 No         rented_count    0       0    0      0     0     0
-2 Yes        rented_count  729.    542  642.   870     2  3556</code></pre>
+  functional variable       mean median     sd   IQR   min   max
+  &lt;fct&gt;      &lt;chr&gt;         &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+1 No         rented_count   0         0   0        0     0     0
+2 Yes        rented_count 729.16    542 642.35   870     2  3556</code></pre>
 </div>
 </div>
 <p>Indeed, there are no rentals for the hours in which <code>functional</code> is “no”. Let’s subset to only observations where this indicator has a value of “yes”.</p>
@@ -459,12 +459,12 @@ $`Functioning Day`
 <span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(mean__rented_count<span class="sc">:</span>max__rented_count,<span class="at">names_to =</span> <span class="fu">c</span>(<span class="st">".value"</span>, <span class="st">"variable"</span>),<span class="at">names_sep =</span> <span class="st">"__"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 4 × 8
-  season variable      mean median    sd   IQR   min   max
-  &lt;fct&gt;  &lt;chr&gt;        &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-1 Autumn rented_count  924.   856   618.  844      2  3298
-2 Spring rented_count  746.   599   619.  893      2  3251
-3 Summer rented_count 1034.   906.  690.  916.     9  3556
-4 Winter rented_count  226.   203   150.  195      3   937</code></pre>
+  season variable        mean median     sd    IQR   min   max
+  &lt;fct&gt;  &lt;chr&gt;          &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+1 Autumn rented_count  924.11  856   617.55 844        2  3298
+2 Spring rented_count  746.25  599   618.67 893        2  3251
+3 Summer rented_count 1034.1   905.5 690.24 915.75     9  3556
+4 Winter rented_count  225.54  203   150.37 195        3   937</code></pre>
 </div>
 </div>
 <p>Note that winter has much lower average hourly rentals. This makes sense as this is the coldest time of the year.</p>
@@ -483,10 +483,10 @@ $`Functioning Day`
 <span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(mean__rented_count<span class="sc">:</span>max__rented_count,<span class="at">names_to =</span> <span class="fu">c</span>(<span class="st">".value"</span>, <span class="st">"variable"</span>),<span class="at">names_sep =</span> <span class="st">"__"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 2 × 8
-  holiday    variable      mean median    sd   IQR   min   max
-  &lt;fct&gt;      &lt;chr&gt;        &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-1 Holiday    rented_count  529.    259  574.  694.     3  2400
-2 No Holiday rented_count  739.    561  644.  872      2  3556</code></pre>
+  holiday    variable       mean median     sd    IQR   min   max
+  &lt;fct&gt;      &lt;chr&gt;         &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+1 Holiday    rented_count 529.15    259 573.93 694.25     3  2400
+2 No Holiday rented_count 739.28    561 644.00 872        2  3556</code></pre>
 </div>
 </div>
 <p>Interestingly, the average hourly rental count is lower on holidays. This may be because holidays are more likely to occur in colder seasons, or it may be because the bikes are commonly used to travel to and from work.</p>
@@ -511,16 +511,16 @@ $`Functioning Day`
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 8 × 9
 # Groups:   season [4]
-  season holiday    variable      mean median    sd   IQR   min   max
-  &lt;fct&gt;  &lt;fct&gt;      &lt;chr&gt;        &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-1 Autumn Holiday    rented_count  948.   900   603.  973.   105  2400
-2 Autumn No Holiday rented_count  923.   852   618.  833      2  3298
-3 Spring Holiday    rented_count  635.   366.  609.  870.    11  2082
-4 Spring No Holiday rented_count  750.   605   619.  890.     2  3251
-5 Summer Holiday    rented_count 1022.   925   564.  848.   218  2163
-6 Summer No Holiday rented_count 1034.   904.  693.  918      9  3556
-7 Winter Holiday    rented_count  157.   138   108.  150      3   671
-8 Winter No Holiday rented_count  232.   212   152.  196.     7   937</code></pre>
+  season holiday    variable        mean median     sd    IQR   min   max
+  &lt;fct&gt;  &lt;fct&gt;      &lt;chr&gt;          &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+1 Autumn Holiday    rented_count  948.10  900   603.40 973.25   105  2400
+2 Autumn No Holiday rented_count  922.86  852   618.41 833        2  3298
+3 Spring Holiday    rented_count  635.31  366.5 608.92 869.5     11  2082
+4 Spring No Holiday rented_count  750.08  605   618.79 890.5      2  3251
+5 Summer Holiday    rented_count 1022.1   925   564.37 848.25   218  2163
+6 Summer No Holiday rented_count 1034.3   904.5 692.89 918        9  3556
+7 Winter Holiday    rented_count  156.62  138   107.51 150        3   671
+8 Winter No Holiday rented_count  232.26  212   152.28 196.25     7   937</code></pre>
 </div>
 </div>
 <p>It seems the average hourly rental count is lower on holidays in spring and winter. However, the opposite is true in the fall and the difference is negligible in the summer.</p>
@@ -708,17 +708,17 @@ See help("Deprecated")</code></pre>
 <span id="cb47-10"><a href="#cb47-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">everything</span>(),<span class="at">names_to =</span> <span class="fu">c</span>(<span class="st">".value"</span>, <span class="st">"variable"</span>),<span class="at">names_sep =</span> <span class="st">"__"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 9 × 7
-  variable          mean    median       sd       IQR      min      max
-  &lt;chr&gt;            &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
-1 rented_count 17485.    18563     9937.    19318     977      36149   
-2 snowfall         1.86      0        8.80      0       0         78.7 
-3 rainfall         3.58      0       11.8       0.5     0         95.5 
-4 temperature     12.8      13.7     11.7      19.3   -14.7       33.7 
-5 humidity        58.2      57.2     14.9      20.1    22.2       95.9 
-6 wind_speed       1.73      1.66     0.597     0.65    0.662      4   
-7 visibility    1434.     1558.     491.      787.    214.      2000   
-8 dew_point        3.95      4.61    13.0      20.1   -27.8       25.0 
-9 radiation        0.568     0.565    0.316     0.537   0.0292     1.22</code></pre>
+  variable            mean     median         sd         IQR        min      max
+  &lt;chr&gt;              &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;       &lt;dbl&gt;      &lt;dbl&gt;    &lt;dbl&gt;
+1 rented_count 17485.      18563      9937.2     19318       977        3.6149e4
+2 snowfall         1.8629      0         8.8044      0         0        7.87  e1
+3 rainfall         3.5759      0        11.790       0.5       0        9.55  e1
+4 temperature     12.776      13.738    11.718      19.288   -14.738    3.3742e1
+5 humidity        58.166      57.167    14.866      20.125    22.25     9.5875e1
+6 wind_speed       1.7261      1.6583    0.59728     0.65      0.6625   4     e0
+7 visibility    1434.0      1557.8     491.16      787.25    214.29     2     e3
+8 dew_point        3.9542      4.6125   12.993      20.108   -27.75     2.5037e1
+9 radiation        0.56773     0.565     0.31613     0.53667   0.029167 1.2167e0</code></pre>
 </div>
 </div>
 <p>This clearly demonstrates our transformations, as the previously hourly averages for <code>rented_count</code>, <code>snowfall</code>, and <code>rainfall</code> have now been effectively scaled up to reflect the 24-hour period.</p>
@@ -737,12 +737,12 @@ See help("Deprecated")</code></pre>
 <span id="cb49-11"><a href="#cb49-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(mean__rented_count<span class="sc">:</span>max__rented_count,<span class="at">names_to =</span> <span class="fu">c</span>(<span class="st">".value"</span>, <span class="st">"variable"</span>),<span class="at">names_sep =</span> <span class="st">"__"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 4 × 8
-  season variable       mean median    sd    IQR   min   max
-  &lt;fct&gt;  &lt;chr&gt;         &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-1 Autumn rented_count 22099. 23350  6711. 10733   1721 31809
-2 Spring rented_count 17910. 17590  8357. 14362.   977 31681
-3 Summer rented_count 24818. 25572. 7297.  9308.  3231 36149
-4 Winter rented_count  5413.  5498  1808.  2634.  2014  9539</code></pre>
+  season variable        mean median     sd     IQR   min   max
+  &lt;fct&gt;  &lt;chr&gt;          &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+1 Autumn rented_count 22099.  23350  6710.9 10733    1721 31809
+2 Spring rented_count 17910.  17590  8357.1 14362.    977 31681
+3 Summer rented_count 24818.  25572. 7297.3  9308.5  3231 36149
+4 Winter rented_count  5413.0  5498  1808.3  2633.8  2014  9539</code></pre>
 </div>
 </div>
 <p>We see the same pattern as we did for the hourly data, with summer and autumn having the highest daily average counts. One interesting note we did not discuss previously: the standard deviation, inner quartile range, and range all indicate that spring sees the greatest volatility in bike share activity across days. This is not particularly surprising as spring likely has both cold, snowy days and warm, sunny days.</p>
@@ -761,10 +761,10 @@ See help("Deprecated")</code></pre>
 <span id="cb51-11"><a href="#cb51-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(mean__rented_count<span class="sc">:</span>max__rented_count,<span class="at">names_to =</span> <span class="fu">c</span>(<span class="st">".value"</span>, <span class="st">"variable"</span>),<span class="at">names_sep =</span> <span class="st">"__"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 2 × 8
-  holiday    variable       mean median     sd    IQR   min   max
-  &lt;fct&gt;      &lt;chr&gt;         &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-1 Holiday    rented_count 12700.  7184  10504. 16576   2014 30498
-2 No Holiday rented_count 17727. 19104.  9862. 19168.   977 36149</code></pre>
+  holiday    variable       mean median      sd    IQR   min   max
+  &lt;fct&gt;      &lt;chr&gt;         &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+1 Holiday    rented_count 12700.  7184  10504.  16576   2014 30498
+2 No Holiday rented_count 17727. 19104.  9862.4 19168.   977 36149</code></pre>
 </div>
 </div>
 <p>We again see the intriguing factor that non-holiday days in our sample see greater rental activity, on average.</p>
@@ -789,16 +789,16 @@ See help("Deprecated")</code></pre>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 8 × 9
 # Groups:   season [4]
-  season holiday    variable       mean median     sd    IQR   min   max
-  &lt;fct&gt;  &lt;fct&gt;      &lt;chr&gt;         &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-1 Autumn Holiday    rented_count 22754. 21705   5642.  5740  17259 30349
-2 Autumn No Holiday rented_count 22065. 23472   6792. 10734   1721 31809
-3 Spring Holiday    rented_count 15247. 13790  10917. 10844   5132 26820
-4 Spring No Holiday rented_count 18002. 17730   8322. 14224.   977 31681
-5 Summer Holiday    rented_count 24532. 24532.  8438.  5966. 18565 30498
-6 Summer No Holiday rented_count 24824. 25572.  7324.  9165   3231 36149
-7 Winter Holiday    rented_count  3759   3454.  1561.  1060.  2014  7184
-8 Winter No Holiday rented_count  5574.  5609   1757.  2564   2487  9539</code></pre>
+  season holiday    variable        mean  median      sd     IQR   min   max
+  &lt;fct&gt;  &lt;fct&gt;      &lt;chr&gt;          &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+1 Autumn Holiday    rented_count 22754.  21705    5641.9  5740   17259 30349
+2 Autumn No Holiday rented_count 22065.  23472    6791.6 10734    1721 31809
+3 Spring Holiday    rented_count 15247.  13790   10917.  10844    5132 26820
+4 Spring No Holiday rented_count 18002.  17730    8321.7 14224.    977 31681
+5 Summer Holiday    rented_count 24532.  24532.   8437.9  5966.5 18565 30498
+6 Summer No Holiday rented_count 24824.  25572.   7324.3  9165    3231 36149
+7 Winter Holiday    rented_count  3759    3453.5  1561.1  1060.2  2014  7184
+8 Winter No Holiday rented_count  5574.4  5609    1756.7  2564    2487  9539</code></pre>
 </div>
 </div>
 <p>We again see that non-holiday days see more activity, on average, than holiday days only in spring and winter.</p>
@@ -1107,22 +1107,34 @@ See help("Deprecated")</code></pre>
 <span id="cb65-23"><a href="#cb65-23" aria-hidden="true" tabindex="-1"></a><span class="co">#Printing recipe variable list with roles</span></span>
 <span id="cb65-24"><a href="#cb65-24" aria-hidden="true" tabindex="-1"></a>bike_rec_2 <span class="sc">|&gt;</span></span>
 <span id="cb65-25"><a href="#cb65-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">prep</span>(<span class="at">training =</span> bike_share_train) <span class="sc">|&gt;</span></span>
-<span id="cb65-26"><a href="#cb65-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb65-26"><a href="#cb65-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>() <span class="sc">|&gt;</span></span>
+<span id="cb65-27"><a href="#cb65-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="at">n =</span> <span class="dv">22</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 22 × 4
-   variable     type      role      source  
-   &lt;chr&gt;        &lt;list&gt;    &lt;chr&gt;     &lt;chr&gt;   
- 1 date         &lt;chr [1]&gt; ID        original
- 2 snowfall     &lt;chr [2]&gt; predictor original
- 3 rainfall     &lt;chr [2]&gt; predictor original
- 4 temperature  &lt;chr [2]&gt; predictor original
- 5 humidity     &lt;chr [2]&gt; predictor original
- 6 wind_speed   &lt;chr [2]&gt; predictor original
- 7 visibility   &lt;chr [2]&gt; predictor original
- 8 dew_point    &lt;chr [2]&gt; predictor original
- 9 radiation    &lt;chr [2]&gt; predictor original
-10 rented_count &lt;chr [2]&gt; outcome   original
-# ℹ 12 more rows</code></pre>
+   variable                           type      role      source  
+   &lt;chr&gt;                              &lt;list&gt;    &lt;chr&gt;     &lt;chr&gt;   
+ 1 date                               &lt;chr [1]&gt; ID        original
+ 2 snowfall                           &lt;chr [2]&gt; predictor original
+ 3 rainfall                           &lt;chr [2]&gt; predictor original
+ 4 temperature                        &lt;chr [2]&gt; predictor original
+ 5 humidity                           &lt;chr [2]&gt; predictor original
+ 6 wind_speed                         &lt;chr [2]&gt; predictor original
+ 7 visibility                         &lt;chr [2]&gt; predictor original
+ 8 dew_point                          &lt;chr [2]&gt; predictor original
+ 9 radiation                          &lt;chr [2]&gt; predictor original
+10 rented_count                       &lt;chr [2]&gt; outcome   original
+11 season_Spring                      &lt;chr [2]&gt; predictor derived 
+12 season_Summer                      &lt;chr [2]&gt; predictor derived 
+13 season_Winter                      &lt;chr [2]&gt; predictor derived 
+14 holiday_No.Holiday                 &lt;chr [2]&gt; predictor derived 
+15 weekend_yes                        &lt;chr [2]&gt; predictor derived 
+16 holiday_No.Holiday_x_season_Spring &lt;chr [2]&gt; predictor derived 
+17 holiday_No.Holiday_x_season_Summer &lt;chr [2]&gt; predictor derived 
+18 holiday_No.Holiday_x_season_Winter &lt;chr [2]&gt; predictor derived 
+19 temperature_x_season_Spring        &lt;chr [2]&gt; predictor derived 
+20 temperature_x_season_Summer        &lt;chr [2]&gt; predictor derived 
+21 temperature_x_season_Winter        &lt;chr [2]&gt; predictor derived 
+22 temperature_x_rainfall             &lt;chr [2]&gt; predictor derived </code></pre>
 </div>
 </div>
 <p>When printing the summary of this prepped recipe, we see the interaction terms; the “x” in the interaction term names is a nice touch by the <code>tidyverse</code>.</p>
@@ -1155,22 +1167,42 @@ See help("Deprecated")</code></pre>
 <span id="cb67-25"><a href="#cb67-25" aria-hidden="true" tabindex="-1"></a><span class="co">#Printing recipe variable list with roles</span></span>
 <span id="cb67-26"><a href="#cb67-26" aria-hidden="true" tabindex="-1"></a>bike_rec_3 <span class="sc">|&gt;</span></span>
 <span id="cb67-27"><a href="#cb67-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">prep</span>(<span class="at">training =</span> bike_share_train) <span class="sc">|&gt;</span></span>
-<span id="cb67-28"><a href="#cb67-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb67-28"><a href="#cb67-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>() <span class="sc">|&gt;</span></span>
+<span id="cb67-29"><a href="#cb67-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="at">n =</span> <span class="dv">30</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 30 × 4
-   variable           type      role      source  
-   &lt;chr&gt;              &lt;list&gt;    &lt;chr&gt;     &lt;chr&gt;   
- 1 date               &lt;chr [1]&gt; ID        original
- 2 rented_count       &lt;chr [2]&gt; outcome   original
- 3 snowfall_poly_1    &lt;chr [2]&gt; predictor derived 
- 4 snowfall_poly_2    &lt;chr [2]&gt; predictor derived 
- 5 rainfall_poly_1    &lt;chr [2]&gt; predictor derived 
- 6 rainfall_poly_2    &lt;chr [2]&gt; predictor derived 
- 7 temperature_poly_1 &lt;chr [2]&gt; predictor derived 
- 8 temperature_poly_2 &lt;chr [2]&gt; predictor derived 
- 9 humidity_poly_1    &lt;chr [2]&gt; predictor derived 
-10 humidity_poly_2    &lt;chr [2]&gt; predictor derived 
-# ℹ 20 more rows</code></pre>
+   variable                             type      role      source  
+   &lt;chr&gt;                                &lt;list&gt;    &lt;chr&gt;     &lt;chr&gt;   
+ 1 date                                 &lt;chr [1]&gt; ID        original
+ 2 rented_count                         &lt;chr [2]&gt; outcome   original
+ 3 snowfall_poly_1                      &lt;chr [2]&gt; predictor derived 
+ 4 snowfall_poly_2                      &lt;chr [2]&gt; predictor derived 
+ 5 rainfall_poly_1                      &lt;chr [2]&gt; predictor derived 
+ 6 rainfall_poly_2                      &lt;chr [2]&gt; predictor derived 
+ 7 temperature_poly_1                   &lt;chr [2]&gt; predictor derived 
+ 8 temperature_poly_2                   &lt;chr [2]&gt; predictor derived 
+ 9 humidity_poly_1                      &lt;chr [2]&gt; predictor derived 
+10 humidity_poly_2                      &lt;chr [2]&gt; predictor derived 
+11 wind_speed_poly_1                    &lt;chr [2]&gt; predictor derived 
+12 wind_speed_poly_2                    &lt;chr [2]&gt; predictor derived 
+13 visibility_poly_1                    &lt;chr [2]&gt; predictor derived 
+14 visibility_poly_2                    &lt;chr [2]&gt; predictor derived 
+15 dew_point_poly_1                     &lt;chr [2]&gt; predictor derived 
+16 dew_point_poly_2                     &lt;chr [2]&gt; predictor derived 
+17 radiation_poly_1                     &lt;chr [2]&gt; predictor derived 
+18 radiation_poly_2                     &lt;chr [2]&gt; predictor derived 
+19 season_Spring                        &lt;chr [2]&gt; predictor derived 
+20 season_Summer                        &lt;chr [2]&gt; predictor derived 
+21 season_Winter                        &lt;chr [2]&gt; predictor derived 
+22 holiday_No.Holiday                   &lt;chr [2]&gt; predictor derived 
+23 weekend_yes                          &lt;chr [2]&gt; predictor derived 
+24 holiday_No.Holiday_x_season_Spring   &lt;chr [2]&gt; predictor derived 
+25 holiday_No.Holiday_x_season_Summer   &lt;chr [2]&gt; predictor derived 
+26 holiday_No.Holiday_x_season_Winter   &lt;chr [2]&gt; predictor derived 
+27 temperature_poly_1_x_season_Spring   &lt;chr [2]&gt; predictor derived 
+28 temperature_poly_1_x_season_Summer   &lt;chr [2]&gt; predictor derived 
+29 temperature_poly_1_x_season_Winter   &lt;chr [2]&gt; predictor derived 
+30 temperature_poly_1_x_rainfall_poly_1 &lt;chr [2]&gt; predictor derived </code></pre>
 </div>
 </div>
 <p>We now have quadratic terms; note that the original numeric variables now have a “_poly_1” suffix to explicitly indicate they are still linear terms.</p>
@@ -1206,14 +1238,14 @@ See help("Deprecated")</code></pre>
 <span id="cb70-22"><a href="#cb70-22" aria-hidden="true" tabindex="-1"></a>      bike_fit_3 <span class="sc">|&gt;</span> <span class="fu">collect_metrics</span>() <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">model =</span> <span class="dv">3</span>) <span class="sc">|&gt;</span> <span class="fu">select</span>(model, <span class="fu">everything</span>()))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 6 × 7
-  model .metric .estimator     mean     n  std_err .config        
-  &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;         &lt;dbl&gt; &lt;int&gt;    &lt;dbl&gt; &lt;chr&gt;          
-1     1 rmse    standard   4333.       10  85.4    pre0_mod0_post0
-2     1 rsq     standard      0.818    10   0.0113 pre0_mod0_post0
-3     2 rmse    standard   3123.       10 265.     pre0_mod0_post0
-4     2 rsq     standard      0.902    10   0.0177 pre0_mod0_post0
-5     3 rmse    standard   3069.       10 280.     pre0_mod0_post0
-6     3 rsq     standard      0.904    10   0.0185 pre0_mod0_post0</code></pre>
+  model .metric .estimator       mean     n    std_err .config        
+  &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;           &lt;dbl&gt; &lt;int&gt;      &lt;dbl&gt; &lt;chr&gt;          
+1     1 rmse    standard   4332.7        10  85.446    pre0_mod0_post0
+2     1 rsq     standard      0.81798    10   0.011328 pre0_mod0_post0
+3     2 rmse    standard   3122.7        10 264.90     pre0_mod0_post0
+4     2 rsq     standard      0.90239    10   0.017679 pre0_mod0_post0
+5     3 rmse    standard   3069.3        10 280.02     pre0_mod0_post0
+6     3 rsq     standard      0.90428    10   0.018502 pre0_mod0_post0</code></pre>
 </div>
 </div>
 <p>Based on the cross-validated “test” root mean squared error (RMSE), the third linear regression model predicts the number of rented bikes best.</p>
@@ -1229,10 +1261,10 @@ See help("Deprecated")</code></pre>
 <span id="cb72-8"><a href="#cb72-8" aria-hidden="true" tabindex="-1"></a>final_fit <span class="sc">|&gt;</span> <span class="fu">collect_metrics</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 2 × 4
-  .metric .estimator .estimate .config        
-  &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt;          
-1 rmse    standard    2963.    pre0_mod0_post0
-2 rsq     standard       0.918 pre0_mod0_post0</code></pre>
+  .metric .estimator  .estimate .config        
+  &lt;chr&gt;   &lt;chr&gt;           &lt;dbl&gt; &lt;chr&gt;          
+1 rmse    standard   2963.4     pre0_mod0_post0
+2 rsq     standard      0.91770 pre0_mod0_post0</code></pre>
 </div>
 </div>
 <p>As we would expect, the test RMSE is similar to that of the cross-validated RMSE we previously obtained for this model. In fact, the RMSE is slightly lower here, which could be explained by the fact that we used the full training set to train this model or simply by randomness.</p>
