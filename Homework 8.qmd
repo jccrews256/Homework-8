@@ -495,7 +495,7 @@ bike_rec_3<-recipe(rented_count ~ ., data = bike_share_train) |>
   #Normalizing all numeric predictors
   step_normalize(all_numeric(), -all_outcomes()) |>
   #Adding quadratic terms for numeric variables
-  step_poly(all_numeric(), -all_outcomes(), degree = 2, options = list(raw = TRUE)) |>
+  step_poly(all_numeric(), -all_outcomes(), degree = 2, options = list(raw = TRUE)) |> 
   #Creating dummies for all factors
   step_dummy(season, holiday, weekend) |>
   #Adding season-holiday interaction
@@ -522,7 +522,7 @@ lm_model<-linear_reg() |>
   set_engine("lm")
 ```
 
-It is finally time to fit some models and see how well they predict! The code below fits each of the three models we have specified above for each of the 10 "training" sets and collects their cross-validation prediction error metrics.  
+It is finally time to fit some models and see how well they predict! The code below fits each of the three models we have specified above for each of the 10 "training" sets and collects their cross-validated prediction error metrics.  
 
 ```{r}
 #Fitting first model to each "training" set and testing for each fold 
@@ -544,10 +544,40 @@ bike_fit_3<-workflow() |>
   fit_resamples(folds)
 
 #Capturing fit metrics
-rbind(bike_fit_1 |> collect_metrics() |> mutate(model = 1),
-      bike_fit_2 |> collect_metrics() |> mutate(model = 2),
-      bike_fit_3 |> collect_metrics() |> mutate(model = 3))
+rbind(bike_fit_1 |> collect_metrics() |> mutate(model = 1) |> select(model, everything()),
+      bike_fit_2 |> collect_metrics() |> mutate(model = 2) |> select(model, everything()),
+      bike_fit_3 |> collect_metrics() |> mutate(model = 3) |> select(model, everything()))
 ```
 
 
-Based on the cross-validated test root mean squared error (RMSE), the third linear regression model predicts the number of rented bikes best. 
+Based on the cross-validated "test" root mean squared error (RMSE), the third linear regression model predicts the number of rented bikes best. 
+
+Now that we've identified the best model, let's fit the model to the entire training set and obtain a final estimate of the out-of-sample RMSE using the original test set. 
+
+```{r}
+#Fitting model to full training set and testing on full test set
+final_fit<-workflow() |>
+  add_recipe(bike_rec_3) |>
+  add_model(lm_model) |>
+  last_fit(bike_share_split)
+
+#Extracting predictive performance for test set
+final_fit |> collect_metrics()
+```
+
+As we would expect, the test RMSE is similar to that of the cross-validated RMSE we previously obtained for this model. In fact, the RMSE is slightly lower here, which could be explained by the fact that we used the full training set to train this model or simply by randomness. 
+
+As a final step, let's extract a summary of the model fit. 
+
+```{r}
+#Extracting fit summary
+final_fit |>
+  extract_fit_parsnip() |>
+  tidy() |>
+  kable()
+```
+
+As we have not fully evaluated all of the assumptions underlying the p-values, we must be cautious in drawing any inferential conclusions for any of the coefficients. Additionally, the complex non-linear relationships modeled here make interpretation difficult. Acknowledging these limitations, there are still interesting relationships revealed by the coefficients and their p-values. For example, the effect of increasing temperature varies substantially by season, as we see that an increase in temperatures has a uniquely large negative impact on rental activity in the summer. This makes sense, as the average temperature in summer will already be warm and increases of a few degrees Celsius (or a few standard deviations in the model) could correspond to an uncomfortably hot day. 
+
+Additionally, higher levels of radiation (more sunny day) generally correspond to more rental activity, but there are diminishing returns to increased radiation reflected in the negative quadratic term. 
+
