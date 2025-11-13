@@ -25,7 +25,7 @@ library(patchwork)
 library(rsample)
 
 #Ensuring we don't print in scientific notation
-options(scipen = 999,pillar.sigfig = 5)
+options(scipen = 999,pillar.sigfig = 7)
 ```
 
 
@@ -34,7 +34,8 @@ options(scipen = 999,pillar.sigfig = 5)
 Now we will read in the Seoul bike share data. In the code chunk below, note that we must specify that the encoding is "latin1" in order to read in the data without error. 
 
 ```{r}
-bike_share_data<-read_csv("https://www4.stat.ncsu.edu/~online/datasets/SeoulBikeData.csv",locale = locale(encoding = "latin1"))
+bike_share_data<-read_csv("https://www4.stat.ncsu.edu/~online/datasets/SeoulBikeData.csv",
+                          locale = locale(encoding = "latin1"))
 ```
 
 # Exploratory Data Analysis
@@ -166,7 +167,8 @@ bike_share_data |>
                                       "min" = min,
                                       "max" = max),
                    .names = "{.fn}__{.col}")) |>
-  pivot_longer(mean__rented_count:max__rented_count,names_to = c(".value", "variable"),names_sep = "__") 
+  pivot_longer(mean__rented_count:max__rented_count,names_to = c(".value", "variable"),
+               names_sep = "__") 
 ```
 
 Indeed, there are no rentals for the hours in which `functional` is "no". Let's subset to only observations where this indicator has a value of "yes". 
@@ -191,7 +193,8 @@ bike_share_data |>
                                       "min" = min,
                                       "max" = max),
                    .names = "{.fn}__{.col}")) |>
-  pivot_longer(mean__rented_count:max__rented_count,names_to = c(".value", "variable"),names_sep = "__") 
+  pivot_longer(mean__rented_count:max__rented_count,names_to = c(".value", "variable"),
+               names_sep = "__") 
 ```
 
 Note that winter has much lower average hourly rentals. This makes sense as this is the coldest time of the year. 
@@ -209,7 +212,8 @@ bike_share_data |>
                                       "min" = min,
                                       "max" = max),
                    .names = "{.fn}__{.col}")) |>
-  pivot_longer(mean__rented_count:max__rented_count,names_to = c(".value", "variable"),names_sep = "__") 
+  pivot_longer(mean__rented_count:max__rented_count,names_to = c(".value", "variable"),
+               names_sep = "__") 
 ```
 
 Interestingly, the average hourly rental count is lower on holidays. This may be because holidays are more likely to occur in colder seasons, or it may be because the bikes are commonly used to travel to and from work. 
@@ -228,7 +232,8 @@ bike_share_data |>
                                       "min" = min,
                                       "max" = max),
                    .names = "{.fn}__{.col}")) |>
-  pivot_longer(mean__rented_count:max__rented_count,names_to = c(".value", "variable"),names_sep = "__") 
+  pivot_longer(mean__rented_count:max__rented_count,names_to = c(".value", "variable"),
+               names_sep = "__") 
 ```
 
 It seems the average hourly rental count is lower on holidays in spring and winter. However, the opposite is true in the fall and the difference is negligible in the summer. 
@@ -299,7 +304,8 @@ bike_share_data |>
                                       "min" = min,
                                       "max" = max),
                    .names = "{.fn}__{.col}")) |>
-  pivot_longer(mean__rented_count:max__rented_count,names_to = c(".value", "variable"),names_sep = "__") 
+  pivot_longer(mean__rented_count:max__rented_count,names_to = c(".value", "variable"),
+               names_sep = "__") 
 ```
 
 We see the same pattern as we did for the hourly data, with summer and autumn having the highest daily average counts. One interesting note we did not discuss previously: the standard deviation, inner quartile range, and range all indicate that spring sees the greatest volatility in bike share activity across days. This is not particularly surprising as spring likely has both cold, snowy days and warm, sunny days. 
@@ -317,7 +323,8 @@ bike_share_data |>
                                       "min" = min,
                                       "max" = max),
                    .names = "{.fn}__{.col}")) |>
-  pivot_longer(mean__rented_count:max__rented_count,names_to = c(".value", "variable"),names_sep = "__") 
+  pivot_longer(mean__rented_count:max__rented_count,names_to = c(".value", "variable"),
+               names_sep = "__") 
 ```
 
 We again see the intriguing factor that non-holiday days in our sample see greater rental activity, on average. 
@@ -336,7 +343,8 @@ bike_share_data |>
                                       "min" = min,
                                       "max" = max),
                    .names = "{.fn}__{.col}")) |>
-  pivot_longer(mean__rented_count:max__rented_count,names_to = c(".value", "variable"),names_sep = "__") 
+  pivot_longer(mean__rented_count:max__rented_count,names_to = c(".value", "variable"),
+               names_sep = "__") 
 ```
 
 We again see that non-holiday days see more activity, on average, than holiday days only in spring and winter. 
